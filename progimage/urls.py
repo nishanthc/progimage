@@ -23,7 +23,6 @@ from image import views
 router = routers.DefaultRouter()
 router.register(r'images', views.ImageViewSet)
 
-
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),

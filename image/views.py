@@ -2,15 +2,17 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from image.models import Image
-from image.serializers import ImageSerializer
+from image.serializers import ImageSerializer, JpegImageSerializer
 
 
 class ImageViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint that allows images to be uploaded in bulk.
     """
     queryset = Image.objects.all().order_by('-created')
     serializer_class = ImageSerializer
@@ -23,4 +25,12 @@ class ImageViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
+    @action(detail=True, methods=['get'])
+    def jpeg(self, request, *args, **kwargs):
+        image = self.get_object()
+        serializer = JpegImageSerializer(data=request.data)
+        if serializer.is_valid():
+            return serializer.convert(image=image)
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)

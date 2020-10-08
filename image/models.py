@@ -16,3 +16,8 @@ class Image(TimeStampedModel):
         blank=True,
         null=True
     )
+
+    remote_location = models.TextField(
+        blank=True,
+        null=True
+    )
