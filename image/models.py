@@ -26,3 +26,6 @@ class Image(TimeStampedModel):
         blank=True,
         null=True
     )
+
+    def clean(self):
+        print(self.base_64)
