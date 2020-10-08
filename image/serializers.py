@@ -10,6 +10,9 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'base_64']
 
     def create(self, validated_data):
-        print(validated_data)
-        Image(**validated_data).save()
+        # create an image object
+        image = Image(**validated_data)
+        image.save()
+        # return the correct uuid for the API response
+        validated_data["id"] = image.id
         return Image(**validated_data)
