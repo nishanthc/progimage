@@ -21,3 +21,8 @@ class Image(TimeStampedModel):
         blank=True,
         null=True
     )
+
+    raw_file = models.FileField(
+        blank=True,
+        null=True
+    )
