@@ -17,6 +17,12 @@ class Image(TimeStampedModel):
         null=True
     )
 
+    extension = models.CharField(
+        max_length=10,
+        blank=True,
+        null=False
+    )
+
     remote_location = models.TextField(
         blank=True,
         null=True

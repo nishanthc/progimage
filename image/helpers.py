@@ -1,5 +1,9 @@
 import base64
 import imghdr
+import io
+
+import requests
+
 
 def get_file_type(base_64):
     try:
@@ -8,6 +12,29 @@ def get_file_type(base_64):
             res = tf(sample, None)
             if res:
                 break
-        return res
+        if res == "png" or res == "jpeg":
+            return res
+        else:
+            return False
     except Exception:
         return False
+
+
+def valid_remote_image(remote_url):
+    data = requests.get(remote_url).content
+    img = io.BytesIO(data)
+    base_64 = base64.b64encode(img.getvalue()).decode()
+    file_type = get_file_type(base_64)
+    if file_type:
+        return True, file_type, base_64
+    else:
+        return False
+
+def base_64_upload(base_64):
+    image = open("image.png", "wb")
+    image.write(base64.b64decode(base_64))
+    image.close()
+    import io
+
+    f = io.BytesIO(base64.b64decode(base_64))
+    return f
