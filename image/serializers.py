@@ -12,8 +12,17 @@ from image.models import Image
 class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Image
-        fields = ['id', 'url', 'base_64', 'remote_location', 'raw_file','extension']
-        read_only_fields = ('id', 'url', 'raw_file','extension')
+        extra_kwargs = {'base_64': {'write_only': True}}
+
+        fields = ['id', 'url', 'base_64', 'remote_location', 'raw_file', 'extension']
+        read_only_fields = ('id', 'url', 'raw_file', 'extension')
+
+    def get_fields(self, *args, **kwargs):
+        fields = super().get_fields(*args, **kwargs)
+        request = self.context.get('request')
+        if request is not None and not request.parser_context.get('kwargs'):
+            fields.pop('base_64', None)
+        return fields
 
     def create(self, validated_data):
         # create an image object
@@ -41,7 +50,7 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
         # return the correct uuid for the API response
         validated_data["id"] = image.id
         f_data = ContentFile(base64.b64decode(image.base_64))
-        image.raw_file.save("file_name.jpg",f_data)
+        image.raw_file.save("file_name.jpg", f_data)
         validated_data["raw_file"] = image.raw_file
 
         return Image(**validated_data)
