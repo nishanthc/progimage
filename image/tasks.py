@@ -32,13 +32,12 @@ def convert(self, image):
     print(base64.b64decode(image.base_64))
     with io.BytesIO() as f:
         im = Im.open(io.BytesIO(base64.b64decode(image.base_64)))
-        im.convert("RGB")
+        im = im.convert("RGB")
         im.save(f, format='JPEG')
         f_data = ContentFile(f.getvalue())
         image.jpeg.save(f"{image.id}.jpeg", f_data)
 
         im = Im.open(io.BytesIO(base64.b64decode(image.base_64)))
-
         im.save(f, format='PNG')
         f_data = ContentFile(f.getvalue())
         image.png.save(f"{image.id}.png", f_data)
