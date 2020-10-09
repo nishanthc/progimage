@@ -33,5 +33,14 @@ class Image(TimeStampedModel):
         null=True
     )
 
+    jpeg = models.FileField(
+        blank=True,
+        null=True
+    )
+
+    png = models.FileField(
+        blank=True,
+        null=True
+    )
     def clean(self):
         print(self.base_64)

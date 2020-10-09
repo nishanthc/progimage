@@ -29,12 +29,3 @@ def valid_remote_image(remote_url):
         return True, file_type, base_64
     else:
         return False
-
-def base_64_upload(base_64):
-    image = open("image.png", "wb")
-    image.write(base64.b64decode(base_64))
-    image.close()
-    import io
-
-    f = io.BytesIO(base64.b64decode(base_64))
-    return f

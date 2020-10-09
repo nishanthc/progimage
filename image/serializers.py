@@ -5,8 +5,10 @@ from rest_framework import serializers, response, status
 from rest_framework.fields import CharField
 from rest_framework.response import Response
 
-from image.helpers import get_file_type, valid_remote_image, base_64_upload
+from image.helpers import get_file_type, valid_remote_image
 from image.models import Image
+from image.tasks import convert
+from progimage.celery import debug_task
 
 
 class ImageSerializer(serializers.HyperlinkedModelSerializer):
@@ -14,15 +16,8 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
         model = Image
         extra_kwargs = {'base_64': {'write_only': True}}
 
-        fields = ['id', 'url', 'base_64', 'remote_location', 'raw_file', 'extension']
-        read_only_fields = ('id', 'url', 'raw_file', 'extension')
-
-    def get_fields(self, *args, **kwargs):
-        fields = super().get_fields(*args, **kwargs)
-        request = self.context.get('request')
-        if request is not None and not request.parser_context.get('kwargs'):
-            fields.pop('base_64', None)
-        return fields
+        fields = ['id', 'url', 'base_64', 'remote_location', 'raw_file', 'extension', 'jpeg', 'png']
+        read_only_fields = ('id', 'url', 'raw_file', 'extension', 'jpeg', 'png')
 
     def create(self, validated_data):
         # create an image object
@@ -50,14 +45,14 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
         # return the correct uuid for the API response
         validated_data["id"] = image.id
         f_data = ContentFile(base64.b64decode(image.base_64))
-        image.raw_file.save("file_name.jpg", f_data)
+        image.raw_file.save(f"file_name.{image.extension}", f_data)
         validated_data["raw_file"] = image.raw_file
-
+        convert.delay(image.id)
         return Image(**validated_data)
 
     def update(self, instance, validated_data):
-        validated_data.pop('remote_location', None)  # prevent myfield from being updated
-        validated_data.pop('base_64', None)  # prevent myfield from being updated
+        validated_data.pop('remote_location', None)
+        validated_data.pop('base_64', None)
 
         return super().update(instance, validated_data)
 

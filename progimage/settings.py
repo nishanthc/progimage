@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import environ
 from pathlib import Path
+from kombu.utils.url import quote
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -142,3 +143,19 @@ AWS_S3_OBJECT_PARAMETERS = {
 AWS_S3_REGION_NAME = env.str('AWS_S3_REGION_NAME')
 
 DEFAULT_FILE_STORAGE = 'progimage.storage_backends.MediaStorage'
+
+broker_transport_options = {
+    'region': env.str("AWS_S3_REGION_NAME"),
+}
+broker_url = f'sqs://{quote(env.str("AWS_ACCESS_KEY_ID"), safe="")}:{quote(env.str("AWS_SECRET_ACCESS_KEY"), safe="")}@'
+accept_content = ['application/json']
+ONCE = {
+    'backend': 'celery_once.backends.File',
+    'settings': {
+        'location': '/tmp/celery_once',
+        'default_timeout': 60 * 60
+    }
+}
+result_backend = None  # Disabling the results backend
+result_serializer = 'json'
+task_serializer = 'json'
