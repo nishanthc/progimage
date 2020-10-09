@@ -55,10 +55,3 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
         validated_data.pop('base_64', None)
 
         return super().update(instance, validated_data)
-
-
-class JpegImageSerializer(serializers.Serializer):
-
-    def convert(self, image):
-        print(image)
-        return Response({"message": "success"})

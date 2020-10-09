@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from image.models import Image
-from image.serializers import ImageSerializer, JpegImageSerializer
+from image.serializers import ImageSerializer
 
 
 class ImageViewSet(viewsets.ModelViewSet):
@@ -24,13 +24,3 @@ class ImageViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    @action(detail=True, methods=['get'])
-    def jpeg(self, request, *args, **kwargs):
-        image = self.get_object()
-        serializer = JpegImageSerializer(data=request.data)
-        if serializer.is_valid():
-            return serializer.convert(image=image)
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
